@@ -1,4 +1,4 @@
-package services
+package service
 
 import (
 	"log/slog"
@@ -31,7 +31,6 @@ func (s *Service) Run() {
 	/*
 		Will be implemented in the future
 		Its will be run in goroutine for episodically running all agent
-
-
 	*/
+
 }
