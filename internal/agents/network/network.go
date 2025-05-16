@@ -3,7 +3,7 @@ package network
 import (
 	"context"
 	"fmt"
-	"resource-graber/internal/dto"
+	"resource-graber/internal/domains/dto"
 	"sync"
 	"time"
 
@@ -22,20 +22,25 @@ func (n *NetworkAgent) GetInterfaces() error {
 	// #TODO: realize the logic to add adapters
 	// this function will be called when the program starts
 	// and will add all available adapters to the list
-	// for _, device := range devices {
-	// }
+	for _, device := range devices {
+		n.addAdapter(device.Name)
+	}
 
 	return nil
 }
 
-func (n *NetworkAgent) addAdapter(name string, ip string) {
+func (n *NetworkAgent) addAdapter(name string) {
 	if _, ok := n.adapters[name]; !ok {
 		n.adapters[name] = &Adapter{
-			IP:           ip,
 			PacketInfo:   make([]dto.PacketInfo, 0),
 			mu:           &sync.Mutex{},
 			PacketCounts: make(map[string]int),
 			IsUsed:       true,
+		}
+
+		n.adapterChan <- AdapterAction{
+			Action: "add",
+			Name:   name,
 		}
 	}
 }
@@ -52,8 +57,8 @@ func (n *NetworkAgent) Capture(ctx context.Context, deviceName string) error {
 	return nil
 }
 
-func (n *NetworkAgent) monitorAdapters(ctx context.Context) {
-	ticker := time.NewTicker(10 * time.Second)
+func (n *NetworkAgent) monitorAdapters(ctx context.Context, inactiveTimeout time.Duration) {
+	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 	for {
 		select {
@@ -67,9 +72,30 @@ func (n *NetworkAgent) monitorAdapters(ctx context.Context) {
 				continue
 			}
 
-			curAdapters := make(map[string]bool, len(n.adapters))
-			for name := range n.adapters {
-				curAdapters[name] = true
+			curDevice := make(map[string]bool, len(devices))
+			for _, device := range devices {
+				curDevice[device.Name] = true
+			}
+
+			for name, adapter := range n.adapters {
+				if curDevice[name] {
+					adapter.mu.Lock()
+					adapter.LastActivityTime = time.Now()
+					adapter.IsUsed = true
+					adapter.mu.Unlock()
+				} else {
+					adapter.mu.Lock()
+					if time.Since(adapter.LastActivityTime) > inactiveTimeout {
+						adapter.IsUsed = false
+					}
+					adapter.mu.Unlock()
+				}
+			}
+
+			for _, device := range devices {
+				if _, exists := n.adapters[device.Name]; !exists {
+					n.addAdapter(device.Name)
+				}
 			}
 		}
 	}

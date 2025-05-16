@@ -1,6 +1,6 @@
 package service
 
-import "resource-graber/internal/models"
+import "resource-graber/internal/domains/models"
 
 func (s *Service) ProcessNetwork() {
 	for {

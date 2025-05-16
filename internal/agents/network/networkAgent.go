@@ -2,20 +2,21 @@ package network
 
 import (
 	"log/slog"
-	"resource-graber/internal/dto"
+	"resource-graber/internal/domains/dto"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 type Adapter struct {
-	IP           string
-	PacketInfo   []dto.PacketInfo
-	mu           *sync.Mutex
-	PacketCounts map[string]int
-	TotalCounts  atomic.Int64
-	TotalSent    atomic.Int64
-	TotalRecv    atomic.Int64
-	IsUsed       bool // flag to check if the adapter still connected
+	LastActivityTime time.Time
+	PacketInfo       []dto.PacketInfo
+	mu               *sync.Mutex
+	PacketCounts     map[string]int
+	TotalCounts      atomic.Int64
+	TotalSent        atomic.Int64
+	TotalRecv        atomic.Int64
+	IsUsed           bool // flag to check if the adapter still connected
 }
 
 type AdapterAction struct {
