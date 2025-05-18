@@ -1,5 +1,10 @@
 package interfaces
 
+import (
+	"context"
+	"resource-graber/internal/domains/dto"
+)
+
 type Network interface {
-	GetInterfaces() error
+	Usage(ctx context.Context) dto.Network
 }

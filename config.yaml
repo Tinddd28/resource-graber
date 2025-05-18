@@ -1,0 +1,16 @@
+client:
+  host: "127.0.0.1:7131"
+  
+screenshot:
+  timeout: 600s
+  load_timeout: 1h
+  path: "screen"
+
+network:
+  path: "network"
+  timeout: 20s
+
+application:
+  path: "app"
+
+

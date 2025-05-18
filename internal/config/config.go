@@ -11,7 +11,7 @@ type Config struct {
 	Client     Client     `yaml:"client"`
 	Network    Network    `yaml:"network"`
 	Screenshot Screenshot `yaml:"screenshot"`
-	App        App        `yaml:"app"`
+	App        App        `yaml:"application"`
 }
 
 type Client struct {
@@ -19,13 +19,14 @@ type Client struct {
 }
 
 type Network struct {
-	Path string `yaml:"path"`
+	Path    string        `yaml:"path"`
+	Timeout time.Duration `yaml:"timeout"`
 }
 
 type Screenshot struct {
-	Timeout     time.Time `yaml:"timeout"`
-	LoadTimeout time.Time `yaml:"load_timeout"`
-	Path        string    `yaml:"path"`
+	Timeout     time.Duration `yaml:"timeout"`
+	LoadTimeout time.Duration `yaml:"load_timeout"`
+	Path        string        `yaml:"path"`
 }
 
 type App struct {
@@ -33,14 +34,15 @@ type App struct {
 }
 
 const configPath = "config/config.yaml"
+const debugPath = "config.yaml"
 
 func NewConfig() *Config {
-	if _, err := os.Stat(configPath); err != nil {
+	if _, err := os.Stat(debugPath); err != nil {
 		panic(err)
 	}
 
 	var cfg Config
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+	if err := cleanenv.ReadConfig(debugPath, &cfg); err != nil {
 		panic(err)
 	}
 

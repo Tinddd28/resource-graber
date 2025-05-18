@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"log/slog"
 	"resource-graber/internal/config"
 	intrf "resource-graber/internal/interfaces"
@@ -26,11 +27,8 @@ func NewService(cfg *config.Config, network intrf.Network, client intrf.ClientAP
 	}
 }
 
-func (s *Service) Run() {
+func (s *Service) Run(ctx context.Context) {
 	s.logger.Info("Service started")
-	/*
-		Will be implemented in the future
-		Its will be run in goroutine for episodically running all agent
-	*/
+	go s.NetworkUsage(ctx)
 
 }
